@@ -6,9 +6,9 @@ categories:
 - 分布式组件
 ---
 
-## 初识Redis
+## 一、初识Redis
 
-### Redis特性
+### 1.1 Redis特性
 - 速度快：10万/秒
 - 基于键值对的数据结构服务器
 - 丰富的功能
@@ -19,29 +19,13 @@ categories:
 - 高可用和分布式
 <!--more-->
 
-速度快的原因：
-  - 数据存放于内存中
-  - C语言编写
-  - 单线程，避免多线程产生的竞争问题
-
-Reids的功能：
-  - 键过期功能
-  - 发布订阅功能
-  - 支持Lua 脚本
-  - 提供了简单的事务
-  - 提供了流水线（Pipeline）功能
-
-### 用好Redis的建议
+### 1.2 用好Redis的建议
 1. 勿当作黑盒使用
 2. 阅读源码
 
-### Redis 基本操作
+### 1.3 Redis 基本操作
 
-#### 安装
-  - Linux 上通过源码安装
-  - Mac 上通过Brew 安装
-
-#### 配置、启动、操作、关闭
+#### 1.3.1 配置、启动、操作、关闭
 
 Redis 可执行文件说明：
 
@@ -69,12 +53,9 @@ Redis 基础配置：
 - 除了`shutdown` 命令外，还可以通过`kill` 进程号的方式关掉Redis，但不可使用 `kill -9` 强制杀死Redis服务，不但不会做持久化操作，还会造成缓冲区等资源不能被优雅关闭，极端情况下会造成AOF和复制丢失数据的情况。
 - `shutdown` 还有一个参数，代表是否在关闭Redis前，生成持久化文件：`redis-cli shutdown nosave|save`
 
-### Redis 版本
-  版本号第二位如果是奇数为非稳定版本，偶数代表稳定版本
+## 二、API的理解和使用
 
-## API的理解和使用
-
-### 全局命令
+### 2.1 全局命令
 
 | 命令 | 作用 |
 |--|--|
@@ -87,7 +68,7 @@ Redis 基础配置：
 | type key | 键的数据结构类型 |
 | object encoding key | 查询内部编码 |
 
-### 数据结构和内部编码
+### 2.2 数据结构和内部编码
 
 ```mermaid
   graph TB
@@ -113,15 +94,15 @@ Redis这样设计的好处：
 - 可以改进内部编码，对外数据结构和命令没影响，例如Reids3.2的quicklist，结合了 ziplist 和 linkedlist 两者的优势
 - 多种内部编码实现可以在不同场景下发挥各自的优势
 
-### 单线程架构
+### 2.3 单线程架构
 单线程为什么这么快？
   - 纯内存访问
   - 非阻塞I/O
   - 单线程避免了线程切换和竞态的消耗
 
-### 字符串
+### 2.4 字符串
 
-#### 字符串类型常用命令
+#### 2.4.1 字符串类型常用命令
 | 命令 | 作用 |
 |--|--|
 | set key value [ex seconds] [px milliseconds] [nx xx] | 设置值 |
@@ -134,7 +115,7 @@ Redis这样设计的好处：
 | decr key | 自减操作 |
 | incrby decrby incrbyfloat | 根据数值自增自减 |
 
-#### 字符串类型不常用命令
+#### 2.4.2 字符串类型不常用命令
 | 命令 | 作用 |
 |--|--|
 | append key value | 追加值 |
@@ -143,14 +124,14 @@ Redis这样设计的好处：
 | setrange key offset value | 设置指定位置的字符 |
 | getrange key start end | 获取部分字符串 |
 
-#### 字符串内部编码
+#### 2.4.3 字符串内部编码
   - int：8 个字节的长整型
   - embstr：小于等于 39 个字节的字符串
   - raw：大于 39 个字符的字符串
 
-### 哈希
+### 2.5 哈希
 
-#### 哈希命令
+#### 2.5.1 哈希命令
 | 命令 | 作用 |
 |--|--|
 | hset key field value | 设置值 |
@@ -166,17 +147,17 @@ Redis这样设计的好处：
 | hincrby hincrbyfloat key field | field 自增 |
 | hstrlen key field | 计算value 的字符串长度 |
 
-#### 内部编码
-  - ziplist（压缩列表）：当哈希类型元素个数小于hash-max-ziplist-entries配置（默认512个），同时所有指都小于hash-max-ziplist-value配置（默认64字节）时，Redis 会使用ziplist 作为哈希的内部实现。
+#### 2.5.2 内部编码
+  - ziplist（压缩列表）：当哈希类型元素个数小于hash-max-ziplist-entries配置（默认512个），同时所有值都小于hash-max-ziplist-value配置（默认64字节）时，Redis 会使用ziplist 作为哈希的内部实现。
   - hashtable（哈希表）：当哈希类型无法满足ziplist 的条件时，Redis 会使用hashtable 作为哈希的内部实现，因为此时ziplist 的读写效率会下降，而hashtable 的读写时间复杂度为O(1)。
 
-### 列表
+### 2.6 列表
 
-#### 列表的两个特点：
+#### 2.6.1 列表的两个特点：
   - 列表中的元素是有序的
   - 列表中的元素可以是重复的
 
-#### 命令
+#### 2.6.2 命令
 | 命令 | 作用 |
 |--|--|
 | rpush lpush key value [value ...] | 添加 |
@@ -190,11 +171,11 @@ Redis这样设计的好处：
 | lset key index newValue | 修改 |
 | blpop brpop key [key ...] timeout | 阻塞操作 |
 
-#### 内部编码
+#### 2.6.3 内部编码
   - ziplist
   - linkedlist
 
-#### 使用场景
+#### 2.6.4 使用场景
   - 消息队列
   - 文章列表
   - lpush + lpop = Stack（栈）
@@ -202,10 +183,10 @@ Redis这样设计的好处：
   - lpush + ltrim = Capped Collection（有限集合）
   - lpush + brpop = Message Queue（消息队列）
 
-### 集合
+### 2.7 集合
   Redis 除了支持集合内的增删改查，同时还支持多个结合取交集、并集、差集。
 
-#### 命令
+#### 2.7.1 命令
 集合内操作：
 
 | 命令 | 作用 |
@@ -229,17 +210,17 @@ Redis这样设计的好处：
 
 集合间的运算在元素较多的情况下会比较耗时，Redis 提供了 store 命令将集合间交集、并集、差集的结果保存在 destination key 中。
 
-#### 内部编码
+#### 2.7.2 内部编码
   - intset（整数集合）：当集合中的元素都是整数且元素个数小于set-max-intset-entries配置（默认512个）时，Redis使用intset 作为集合的内部实现
   - hashtable（哈希表）：当集合类型无法满足intset 条件时，Redis 会使用hashtable 作为集合的内部实现
 
-#### 使用场景
+#### 2.7.3 使用场景
   - 标签
 
-### 有序集合
+### 2.8 有序集合
   集合内元素不可重复，但可以排序。它给每个元素设置一个分数（score）作为排序的依据。
 
-#### 命令
+#### 2.8.1 命令
 集合内：
 
 | 命令 | 作用 |
@@ -273,18 +254,18 @@ Redis3.2为zadd添加了nx、xx、ch、incr 四个选项：
   - 并集：
     `zunionstore destination numkeys key [key ...] [weights weight [weight ...]] [aggregate sum|min|max]`
 
-#### 内部编码
+#### 2.8.2 内部编码
   - ziplist（压缩列表）：当有序元素的元素个数小于zset-max-ziplist-entries配置（默认128个），同时每个元素的值都小于zset-max-ziplist-value配置（默认64字节）时，Redis会使用ziplist 作为有序集合的内部实现
   - skiplist（跳跃表）：当ziplist 条件不满足时，有序集合使用skiplist作为内部实现
 
-#### 使用场景
+#### 2.8.3 使用场景
   - 点赞数
   - 前十名
   - 用户分数
 
-### 键管理
+### 2.9 键管理
 
-#### 单个键管理
+#### 2.9.1 单个键管理
 | 命令 | 作用 |
 |--|--|
 | rename key newkey | 键重命名 |
@@ -317,7 +298,7 @@ migrate 参数：
   - [replace]：添加后，不管目标Redis 是否存在该键都会正常迁移并进行数据覆盖
   - [keys key[key ...]]：迁移多个键
 
-#### 遍历键
+#### 2.9.2 遍历键
 - `keys pattern`：全量遍历键
   keys 命令可能会造成Redis 阻塞，不建议使用，当需要遍历键时：
     - 在一个不对外提供的Redis 从节点上执行，不会阻塞到客户端的请求，但会影响主从复制
@@ -330,7 +311,7 @@ migrate 参数：
 
 除了scan 以外，Redis还提供了面向哈希、集合、有序列表的扫描遍历命令：hscan、sscan、zscan
 
-#### 数据库管理
+#### 2.9.3 数据库管理
 | 命令 | 作用 |
 |--|--|
 | select dbIndex | 切换数据库，Redis默认配置中有16个数据库 |
@@ -342,9 +323,9 @@ migrate 参数：
   - 多数据库的使用方式，会让调试和运维不同业务的数据库变得困难，比如一个慢查询，仍然会影响其他数据库
   - 部分Redis 的客户端根本不支持这种方式，即使支持，在开发时来回切换数字形势的数据库，容易弄乱
 
-## 小功能大用处
+## 三、小功能大用处
 
-### 慢查询分析
+### 3.1 慢查询分析
 Redis 提供了`slowlog-log-slower-than` 来设置阀值（微妙，默认 10000，=0时会记录所有的命令，<0时不会进行记录） `slowlog-max-len` 设置慢查询日志的最大条数
 ```shell
 config set slowlog-log-slower-than 20000
@@ -358,7 +339,7 @@ slowlog len
 slowlog reset
 ```
 
-### redis-cli 详解
+### 3.2 redis-cli 详解
 | 参数 | 作用 |
 |--|--|
 | -r | 命令执行多次 |
@@ -379,10 +360,10 @@ slowlog reset
 | --no-raw | 要求命令的返回结果必须是原始的格式 |
 | --raw | 要求命令的返回结果是转换后的格式 |
 
-### redis-server 详解
+### 3.3 redis-server 详解
 参数 `--test-memory` 用来检测当前系统能否稳定的分配指定容量的内存给Redis
 
-### redis-benchmark 详解
+### 3.4 redis-benchmark 详解
 redis-benchmark 可以为Redis做基准性能测试
 
 | 参数 | 作用 |
@@ -395,17 +376,17 @@ redis-benchmark 可以为Redis做基准性能测试
 | -t | 对指定命令进行基准测试 |
 | --csv | 将结果按照csv格式输出 |
 
-### Pipeline
+### 3.5 Pipeline
 有效节约RTT（Round Trip Time，往返时间）
 
-### 事务与Lua
+### 3.6 事务与Lua
 Redis 提供了简单的事务功能，将一组需要一起执行的命令放到mulit 和 exec 两个命令之间，multi 代表事务开始，exec 代表事务结束。
 
-#### 不同错误下的处理机制
+#### 3.6.1 不同错误下的处理机制
 1. 命令错误：整个事务无法执行
 2. 运行时异常：不支持回滚
 
-#### Lua
+#### 3.6.2 Lua
 ```lua
 -- 没有local代表是全局变量
 local strings val = "world"
@@ -463,7 +444,7 @@ end
 print(contact("hello", "world"))
 ```
 
-#### Redis中使用Lua
+#### 3.6.3 Redis中使用Lua
 - eval
   Redis 中执行`eval script key_num keys args`:
   ```shell
@@ -477,24 +458,24 @@ print(contact("hello", "world"))
   evalsha sha1_value key_num keys args
   ```
 
-#### Lua的Redis API
+#### 3.6.4 Lua的Redis API
 Lua 可以使用redis.call、redis.pcall  函数实现对Redis 的访问，两者区别是 redis.call 执行失败，脚本立即返回错误，redis.pcall 会忽略错误继续执行脚本
 ```lua
 redis.call("set", "hello", "world")
 redis.call("get", "hello")
 ```
 
-#### Redis 如何管理Lua脚本
+#### 3.6.5 Redis 如何管理Lua脚本
 - `script load script`：将Lua 脚本加载到Redis内存中
 - `script exists sha1`：判断sha1 是否已经加载到Redis内存中
 - `script flush`：清除已经加载的所有Lua脚本
 - `script kill`：用于杀掉正在执行的Lua脚本，Redis 提供了`lua-time-limit` 参数，默认是 5 秒，但只是当Lua 脚本时间超过`lua-time-limit` 后向其他命令调用发送BUSY 信号，并不会停止服务端和客户端的脚本执行。如果Lua脚本正在执行写操作，`script kill` 将不会生效，此时要么等待脚本结束要么使用 `shutdown save` 停掉Redis服务
 
-### Bitmaps
+### 3.7 Bitmaps
 - Bitmaps 不是一种数据结构，实际上就是字符串，但可以对字符串的位进行操作
 - Bitmaps Bitmaps 类似一个以位为单位的数组，数组的每个单位只能存储0和1，数组的下标在Bitmaps中叫偏移量
 
-#### Bitmaps命令
+#### 3.7.1 Bitmaps命令
 | 命令 | 作用 |
 |--|--|
 | setbit key offset value | 设置值 |
@@ -503,7 +484,7 @@ redis.call("get", "hello")
 | bitop op destkey key[key ...] | Bitmaps间的运算: and、or、not、xor |
 | bitpos key targetBit [start] [end] | 计算Bitmaps中第一个值为targetBit的偏移量 |
 
-### HyperLogLog
+### 3.8 HyperLogLog
 HyperLogLog并不是一种新的数据结构（实际类型为字符串），而是一种基数算法，通过HyperLogLog可以利用极小的内存空间完成独立总数的统计。
 
 | 命令 | 作用 |
@@ -516,7 +497,7 @@ HyperLogLog并不是一种新的数据结构（实际类型为字符串），而
 - 只是为了计算独立总数，不需要获取单条数据
 - 可以容忍一定误差
 
-### 发布订阅
+### 3.9 发布订阅
 
 | 命令 | 作用 |
 |--|--|
@@ -535,7 +516,7 @@ HyperLogLog并不是一种新的数据结构（实际类型为字符串），而
 
 活跃的频道是指当前频道至少有一个订阅者
 
-### GEO（地理信息定位）
+### 3.10 GEO（地理信息定位）
 Redis3.2 版本提供了GEO功能。
 
 | 命令 | 作用 |
@@ -543,7 +524,7 @@ Redis3.2 版本提供了GEO功能。
 | geoadd key longitude latitude member [longitude latitude memeber ...] | 增加地理位置信息 |
 | geopos key member [memeber ...] | 获取地理位置信息 |
 | geodist key member1 member2 [unit] | 获取两个地理位置的距离 |
-| georadius key longitude latitude (radiusm km ft mi) [withcoord] [withdist] [withhash] [COUNT count] [asc desc] [store key] [storedist key] | 获取指定位置范围内的地理信息位置集合 |
+| georadius key longitude latitude radiusm &#124; km &#124; ft &#124; mi [withcoord] [withdist] [withhash] [COUNT count] [asc desc] [store key] [storedist key] | 获取指定位置范围内的地理信息位置集合 |
 | georadiusbymember key member (radiusm km ft mi) [withcoord] [withdist] [withhash] [COUNT count] [asc desc] [store key] [storedist key] | 获取指定位置范围内的成员信息 |
 | geohash key member [member ...] | 获取geohash |
 | zrem key member | 删除地理位置信息 |
@@ -553,7 +534,7 @@ Redis3.2 版本提供了GEO功能。
 - withdist：返回结果中包含离中心节点位置的距离
 - withhash：返回结果中包含geohash
 - COUNT count：指定返回结果的数量
-- asc\|desc：返回结果按照离中心节点的距离做升序或者降序
+- asc&#124;desc：返回结果按照离中心节点的距离做升序或者降序
 - store key：将返回结果的地理位置信息保存到指定键
 - storedist key: 将返回结果离中心节点的距离保存到指定键
 
@@ -563,5 +544,178 @@ Redis3.2 版本提供了GEO功能。
 - 两个字符串越相似，它们之间的距离越近
 - geohash编码和经纬度是可以互换的
 
-## 客户端
+##  四、客户端
+
+### 4.1 客户端通信协议
+
+1. 客户端与服务器端之间的通信协议建立在TCP之上
+2. Redis制定了RESP（REdis Serialization Protocol）
+
+命令格式（CRLF：`\r\n`）：
+
+```
+*<参数数量> CRLF
+$<参数1的字节数量> CRLF
+<参数> CRLF
+$<参数N的字节数量> CRLF
+<参数> CRLF
+```
+
+响应格式：
+
+- `+` ：状态回复
+- `-` ：错误回复
+- `:` ：整数回复
+- `$` ：字符串回复
+- `*` ：多条字符串回复
+
+### 4.2 Java 客户端Jedis
+
+#### 4.2.1 连接池配置
+
+| 参数名 | 含义 | 默认值 |
+|--|--|--|
+| maxActive | 连接池最大连接数 | 8 |
+| maxIdle | 连接池最大空闲的连接数 | 8 |
+| minIdle | 连接池最少空闲的连接数 | 0 |
+| maxWaitMillis | 当连接池资源用尽时的最大等待时间（毫秒） | -1:表示永远不超时 |
+| jmxEnabled | 是否开启jmx 监控，如果应用开启了jmx端口并且jmxEnabled 设置为true，可以通过jconsole 或者 jvisualvm 看到连接池的统计信息 | true |
+| minEvictableIdleTimeMillis | 做空闲连接检测时，每次的采样数 | 3 |
+| testOnBorrow | 向连接池借用连接时是否做连接有效性检测（ping），无效连接会被移除，每次归还还多执行一次ping 命令 | false |
+| testWhileIdle | 向连接池借用连接时是否做空闲检测，空闲超时的连接会被移除 | false |
+| timeBetweenEvictionRunsMillis | 空闲连接的检测周期（毫秒）| -1:表示不做检测 |
+| blockWhenExhausted | 当连接池用尽后，调用者是否要等待，当此参数为true时，maxWaitMillis 才会生效 | true |
+
+### 4.3 客户端管理
+
+#### 4.3.1 客户端API
+
+`client list`：列出与Redis 服务端相连的所有客户端连接信息
+  - id：客户端连接的唯一标识，随着Redis 的连接自增，重启Redis 后重置为 0
+  - addr：客户端连接的ip 和端口
+  - fd：socket的文件描述符，如果fd=-1代表客户端不是外部的，而是Redis内部的伪装客户端
+  - name：客户端的名字
+  - qbuf：输入缓冲区的总容量，输入缓冲区不受maxmemory 控制
+  - qbuf-free：输入缓冲区的剩余容量 
+  - obl：固定输出缓冲区的长度（16KB），使用字节数组，用于返回比较小的执行结果
+  - oll：动态输出缓冲区的长度，使用列表，用于返回比较大的结果
+  - omem：输出缓冲区一共使用的字节数
+
+Redis 没有提供相应的配置来规定每个缓冲区的大小，输入缓冲区会根据输入内容大小动态调整，只是要求每个客户端缓冲区的大小不能超过 1 G，超过后将被关闭。与输入缓冲区不同的是，输出缓冲区的容量可以通过`client-output-buffer-limit` 来进行设置：
+```shell
+client-output-buffer-limit <class> <hard limit> <soft limit> <soft seconds>
+```
+  - &lt;class&gt;：客户端类型：normal：普通客户端；slave：slave客户端；pubsub：发布订阅客户端
+  - &lt;hard limit&gt;：如果客户端使用的输出缓冲区大于&lt;hard limit&gt;，客户端会被立即关闭
+  - &lt;soft limit&gt; &lt;soft seconds&gt;：如果客户端使用的输出缓冲区超过了 &lt;soft limit&gt; 并持续了 &lt;soft limit&gt; 秒，客户端会被立即关闭
+
+### 4.4 客户端常见异常
+
+1. 无法从连接池获取到连接：
+   - 连接池中没有可用的连接并且等待了`maxWaitMillis` 后也无可用连接
+   - 设置了`blockWhenExhausted=false` ，当连接池无可用连接直接抛出异常
+2. 客户端读写超时：
+   - 读写时间设置过短
+   - 命令本身比较慢
+   - 客户端与服务器端网络不正常
+   - Redis自身发生阻塞
+3. 客户端连接超时：
+   - 连接超时时间过短
+   - Redis发生阻塞，造成`tcp-backlog` 已满，造成新的连接失败
+   - 客户端与服务器端网络不正常
+4. 客户端缓冲区异常：
+   - 输出缓冲区满
+   - 长时间闲置被服务器端主动断开
+   - 不正常并发读写
+5. Lua脚本正在执行
+6. Redis正在加载持久化文件
+7. Redis使用的内存超过了`maxmemory` 
+8. 客户端连接数过大
+
+## 五、持久化
+
+#### 5.1 RDB
+
+##### 5.1.1 触发机制
+
+- 手动触发
+  - `save`：阻塞当前服务器，直到RDB过程完成为止
+  - `bgsave`： fork子进程，RDB持久化过程由子进程完成
+- 自动触发
+  - 使用`save m n` 配置，m 秒内数据集存在n 次修改，自动触发bgsave
+  - 从节点执行全量复制操作，主节点自动执行`bgsave` 生成RDB文件发送给从节点
+  - 执行`debug reload` 命令重新加载Redis时，也会自动触发`save` 操作
+  - 默认情况下执行`shutdown` 命令时，如果没有开启AOF持久化功能则自动执行`bgsave` 
+
+##### 5.1.2 RDB的优缺点
+
+优点：
+
+- RDB是一个紧凑压缩的二进制文件，代表Redis在某个时间点上的数据快照，适用于备份，全量复制
+- Redis加载RDB恢复数据远比AOF的方式快
+
+缺点：
+
+- RDB没办法做到实时持久化/秒级持久化，因为`bgsave` 每次运行都要fork子进程，成本过高
+- RDB使用特定二进制格式保存，可能存在老旧版本Redis无法兼容的问题
+
+#### 5.2 AOF
+
+开启AOF功能：`appendonly yes` ，默认不开启
+
+AOF的工作流程：
+
+- 文件写入：所有的写入命令会追加到aof_buf（缓冲区）中，AOF命令写入的内容是文本协议格式
+- 文件同步：AOF缓冲区根据对应的策略向硬盘做同步操作
+- 文件重写：随着AOF文件越来越大，需要定期对AOF文件进行重写，达到压缩的目的
+- 重启加载：当Redis重启时，可以加载AOF文件进行数据恢复
+
+文件同步策略：
+
+| 策略     | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| always   | 命令写入aof_buf后调用系统fsync同步到AOF文件，fsync完成后线程返回 |
+| everysec | 命令写入aof_buf后调用系统write操作，write完成后线程返回，fsync由专门的线程每秒执行一次 |
+| no       | 命令写入aof_buf后调用系统write操作，不对AOF文件做fsync操作   |
+
+系统调用write和fsync区别：
+
+- write 会触发延迟写机制，系统缓冲区同步至硬盘依赖于系统调度机制。
+- fsync针对单个文件操作，做强制硬盘同步，fsync将阻塞知道写入硬盘完成后返回
+
+触发AOF重写：
+
+- 手动触发：直接调用`bgrewriteaof` 
+- 自动触发：根据`auto-aof-rewrite-min-size` 和 `auto-aof-rewrite-percentage` 参数确定触发时机
+
+`auto-aof-rewrite-min-size` ：表示运行AOF重写时文件最小体积，默认64M
+
+`auto-aof-rewrite-percentage` ：当前AOF文件空间（oaf_current_size）和上一次重写后AOF文件空间（aof_base_size）的比值
+
+自动触发时机=`aof_current_size>auto-aof-rewrite-min-sieze && (aof_current_size - aof_base_size)/aof_base_size >= auto-aof-rewrite_percentage` 
+
+#### 5.3 重启加载
+
+```flow
+st=>start: Redis启动
+fail=>end: 启动失败
+success=>end: 启动成功
+open_AOF=>condition: 开启AOF？
+exists_AOF=>condition: 存在AOF？
+exists_RDB=>condition: 存在RDB？
+load_AOF=>operation: 加载AOF
+load_RDB=>operation: 加载RDB
+is_success=>condition: 成功？
+
+st->open_AOF
+open_AOF(yes)->exists_AOF
+exists_AOF(yes)->load_AOF->is_success
+exists_AOF(no)->exists_RDB
+open_AOF(no)->exists_RDB
+exists_RDB(yes)->load_RDB->is_success
+is_success(yes)->success
+is_success(no)->fail
+```
+
+
 
