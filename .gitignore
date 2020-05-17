@@ -106,3 +106,5 @@ dist
 public/
 .deploy_git/
 themes/
+.idea/
+db.json
