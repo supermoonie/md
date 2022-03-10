@@ -20,7 +20,7 @@ tags:
    ```shell
    tar -zxvf elasticsearch-6.5.4.tar.gz
    ```
-
+<!--more-->
 4. 配置
 
    > config/elasticsearch.yml

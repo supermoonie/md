@@ -634,9 +634,9 @@ client-output-buffer-limit <class> <hard limit> <soft limit> <soft seconds>
 
 ## 五、持久化
 
-#### 5.1 RDB
+### 5.1 RDB
 
-##### 5.1.1 触发机制
+#### 5.1.1 触发机制
 
 - 手动触发
   - `save`：阻塞当前服务器，直到RDB过程完成为止
@@ -647,7 +647,7 @@ client-output-buffer-limit <class> <hard limit> <soft limit> <soft seconds>
   - 执行`debug reload` 命令重新加载Redis时，也会自动触发`save` 操作
   - 默认情况下执行`shutdown` 命令时，如果没有开启AOF持久化功能则自动执行`bgsave` 
 
-##### 5.1.2 RDB的优缺点
+#### 5.1.2 RDB的优缺点
 
 优点：
 
@@ -659,7 +659,7 @@ client-output-buffer-limit <class> <hard limit> <soft limit> <soft seconds>
 - RDB没办法做到实时持久化/秒级持久化，因为`bgsave` 每次运行都要fork子进程，成本过高
 - RDB使用特定二进制格式保存，可能存在老旧版本Redis无法兼容的问题
 
-#### 5.2 AOF
+### 5.2 AOF
 
 开启AOF功能：`appendonly yes` ，默认不开启
 
@@ -694,7 +694,7 @@ AOF的工作流程：
 
 自动触发时机=`aof_current_size>auto-aof-rewrite-min-sieze && (aof_current_size - aof_base_size)/aof_base_size >= auto-aof-rewrite_percentage` 
 
-#### 5.3 重启加载
+### 5.3 重启加载
 
 ```flow
 st=>start: Redis启动
@@ -717,5 +717,41 @@ is_success(yes)->success
 is_success(no)->fail
 ```
 
+## 六、面试
 
+### 6.1 过期数据的删除策略
+
+1. 惰性删除：只会在取出key的时候对数据进行过期检查。
+2. 定期删除：每过一段时间抽取一批key进行过期检查。
+
+redis采用的是定期删除+惰性删除
+
+### 6.2 6种内存淘汰策略
+
+1. volatile-lru（last recent use）：从已设置过期时间的数据集中挑选最近最少使用的数据淘汰
+2. volatile-ttl：从已设置过期时间的数据集中挑选将要过期的数据淘汰
+3. volatile-random：从已设置过期时间的数据集中任意挑选数据淘汰
+4. allkeys-lru（last recent use）：在键空间中挑选最近最少使用的数据淘汰
+5. allkeys-random：从数据集中任意挑选数据淘汰
+6. no-eviction：禁止驱逐，内存不足时，新写入报错
+
+4.0 版本新增：
+7. volatile-lfu（last frequent use）：从已设置过期时间的数据集中挑选最不经常使用的数据淘汰
+8. allkeys-lfu：从键空间中挑选最不经常使用的数据淘汰
+
+### 6.3 缓存穿透
+
+大量请求的key不存在缓存中，导致请求全部落在了数据库上。
+
+解决办法：
+1. 缓存无效的key
+2. 布隆过滤器
+
+### 6.4 缓存雪崩
+
+同一时间大面积失效，请求直接落在了数据库上。
+
+解决办法：
+1. 随机设置失效时间
+2. 限流
 
