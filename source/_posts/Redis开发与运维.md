@@ -71,7 +71,7 @@ Redis 基础配置：
 ### 2.2 数据结构和内部编码
 
 ```mermaid
-  graph TB
+  graph LR
     key --> string
     key --> hash
     key --> list
