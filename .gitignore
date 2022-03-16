@@ -108,4 +108,4 @@ public/
 themes/
 .idea/
 db.json
-package-lock.json
+*-lock.json
